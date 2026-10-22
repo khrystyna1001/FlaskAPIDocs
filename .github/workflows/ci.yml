@@ -36,6 +36,12 @@ jobs:
       - name: Run pdoc
         run: uv run pdoc ${{ matrix.service }}.py -o ${{ matrix.service }}-docs
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs-${{ matrix.service }}
+          path: ${{ matrix.service }}-docs/
+
   deploy:
     needs: get_pdoc_docs
     if: github.event.pull_request.merged == true
