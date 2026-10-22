@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: api-docs-${{matrix.service}}/main.html
+          name: api-docs-main
           path: _site/main.html
       - uses: actions/upload-pages-artifact@v5
         with:
