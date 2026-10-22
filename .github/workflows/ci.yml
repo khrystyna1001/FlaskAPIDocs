@@ -55,20 +55,10 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: ${{matrix.service}}-pdoc-report.html
-          path: _site
-      - uses: actions/download-artifact@v8
-        with:
-          name: ${{matrix.service}}-pdoc-report.html
-          path: _site
-      - run: |
-          cat > _site/index.html <<'EOF'
-          <h1>Bandit reports</h1>
-          <p><a href="tasks-api-3.12-bandit-report.html">tasks-api</a></p>
-          <p><a href="${{matrix.service}}-doc.html">title-normalizer</a></p>
-          EOF
+          name: api-docs-${{matrix.service}}/main.html
+          path: _site/main.html
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: _site
+          path: _site/main.html
       - id: deployment
         uses: actions/deploy-pages@v5
