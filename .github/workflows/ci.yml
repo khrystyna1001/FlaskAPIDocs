@@ -11,7 +11,7 @@ on:
 
 
 jobs:
-  run_pdoc:
+  get_pdoc_docs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -27,25 +27,11 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      - run: uv add flask
-      - run: uv run flask --app ${{ matrix.service }} run
-      - run: pdoc ${{ matrix.service }}
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: ${{matrix.service}}-doc
-          path: ${{matrix.service}}-doc.txt
-      - run: uv add bandit
-      - run: uv run bandit -r ${{matrix.service}} -f html -o ${{matrix.service}}-bandit-report.html
-        continue-on-error: true
-      - name: Upload Bandit Report as Artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{matrix.service}}-doc-bandit-report
-          path: ${{matrix.service}}-doc-bandit-report.html
+      - run: uv sync
+      - run: pdoc ${{ matrix.service }} -o ${{matrix.service}}-pdoc-report.html
 
   deploy:
-    needs: run_pdoc
+    needs: get_pdoc_docs
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment:
@@ -57,17 +43,17 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: tasks-api-3.12-bandit-report
+          name: ${{matrix.service}}-pdoc-report.html
           path: _site
       - uses: actions/download-artifact@v8
         with:
-          name: title-normalizer-3.12-bandit-report
+          name: ${{matrix.service}}-pdoc-report.html
           path: _site
       - run: |
           cat > _site/index.html <<'EOF'
           <h1>Bandit reports</h1>
           <p><a href="tasks-api-3.12-bandit-report.html">tasks-api</a></p>
-          <p><a href="title-normalizer-3.12-bandit-report.html">title-normalizer</a></p>
+          <p><a href="${{matrix.service}}-doc.html">title-normalizer</a></p>
           EOF
       - uses: actions/upload-pages-artifact@v5
         with:
