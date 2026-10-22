@@ -27,8 +27,8 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      - run: uv sync
-      - run: uvx pdoc ${{ matrix.service }} -o ${{matrix.service}}-docs
+      - run: uv sync --all-extras --dev
+      - run: uv run pdoc ${{ matrix.service }}.py -o ${{matrix.service}}-docs
 
   deploy:
     needs: get_pdoc_docs
