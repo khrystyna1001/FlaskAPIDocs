@@ -34,7 +34,7 @@ jobs:
         run: uv sync
 
       - name: Run pdoc
-        run: pdoc ${{ matrix.service }}.py -o ${{ matrix.service }}-docs
+        run: uv run pdoc ${{ matrix.service }}.py -o ${{ matrix.service }}-docs
 
   deploy:
     needs: get_pdoc_docs
