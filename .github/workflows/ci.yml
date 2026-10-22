@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: api-docs-main
+          name: api-docs-${{ needs.get_pdoc_docs.outputs.services }}
           path: _site
       - uses: actions/upload-pages-artifact@v5
         with:
