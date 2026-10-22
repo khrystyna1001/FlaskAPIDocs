@@ -28,7 +28,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync
-      - run: uv run pdoc ${{ matrix.service }} -o ${{matrix.service}}-docs
+      - run: uvx pdoc ${{ matrix.service }} -o ${{matrix.service}}-docs
 
   deploy:
     needs: get_pdoc_docs
