@@ -28,7 +28,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv add flask
-      - run: flask --app ${{ matrix.service }} run
+      - run: uv run flask --app ${{ matrix.service }} run
       - run: pdoc ${{ matrix.service }}
       - uses: actions/upload-artifact@v7
         if: always()
