@@ -19,7 +19,7 @@ jobs:
         service: [main] # ${{matrix.service}}
         python-version: ["3.12"] # ${{matrix.python-version}}
     outputs:
-      services: ${{ toJson(matrix.service) }}
+      services: ${{ matrix.service }}
     steps:
       - uses: actions/checkout@v7
 
