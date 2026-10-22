@@ -1,0 +1,76 @@
+name: Autogenerate API Docs for Flask app
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+
+jobs:
+  run_pdoc:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [main] # ${{matrix.service}}
+        python-version: ["3.10", "3.11", "3.12"] # ${{matrix.python-version}}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{matrix.python-version}}
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: flask --app ${{ matrix.service }} run
+      - run: pdoc ${{ matrix.service }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ${{matrix.service}}-doc
+          path: ${{matrix.service}}-doc.txt
+      - run: uv add bandit
+      - run: uv run bandit -r ${{matrix.service}} -f html -o ${{matrix.service}}-bandit-report.html
+        continue-on-error: true
+      - name: Upload Bandit Report as Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{matrix.service}}-doc-bandit-report
+          path: ${{matrix.service}}-doc-bandit-report.html
+
+  deploy:
+    needs: run_pdoc
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write # default for Github Workflow token is none so we cannot write to github pages without it
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: tasks-api-3.12-bandit-report
+          path: _site
+      - uses: actions/download-artifact@v8
+        with:
+          name: title-normalizer-3.12-bandit-report
+          path: _site
+      - run: |
+          cat > _site/index.html <<'EOF'
+          <h1>Bandit reports</h1>
+          <p><a href="tasks-api-3.12-bandit-report.html">tasks-api</a></p>
+          <p><a href="title-normalizer-3.12-bandit-report.html">title-normalizer</a></p>
+          EOF
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v5
