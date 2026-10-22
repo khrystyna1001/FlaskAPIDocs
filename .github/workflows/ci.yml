@@ -44,7 +44,7 @@ jobs:
 
   deploy:
     needs: get_pdoc_docs
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment:
       name: github-pages
